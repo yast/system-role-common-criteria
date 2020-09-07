@@ -1,0 +1,9 @@
+sudo: required
+language: bash
+services:
+  - docker
+
+before_install:
+  - docker build -t yast-system-role-common-criteria-image .
+script:
+  - docker run --privileged -it -e TRAVIS=1 -e TRAVIS_JOB_ID="$TRAVIS_JOB_ID" yast-system-role-common-criteria-image ./.travis.sh
