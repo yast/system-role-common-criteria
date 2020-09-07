@@ -1,7 +1,8 @@
-system-role-gnome
-==============================
+system-role-common-criteria
+===========================
 
-Extension package that lives in module and extend installation by roles provided by this module.
+This is an extension package which provides additional system role for
+the YaST installer.
 
 See also the [documentation for the `control.xml` file][1].
 
