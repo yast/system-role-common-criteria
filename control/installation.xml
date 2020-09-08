@@ -1,10 +1,186 @@
 <?xml version="1.0"?>
 <productDefines xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns">
-
 <!--
-Work around for the text domain
-textdomain="control"
+Create .glade -> .xml symlink and run "y2tool y2makepot" to generate the translations.
+A work around for the POT file generator:
+textdomain="cc-control"
 -->
 
-    <textdomain>control</textdomain>
+    <!-- defines the gettext domain for the messages in this XML -->
+    <textdomain>cc-control</textdomain>
+
+    <update>
+        <system_roles>
+          <insert_system_roles config:type="list">
+            <insert_system_role>
+              <system_roles config:type="list">
+                <system_role>
+                  <id>cc_role</id>
+		  <order config:type="integer">1100</order>
+		  <!--
+		  <additional_dialogs>inst_cc_foo</additional_dialogs>
+		  -->
+                  <globals>
+                    <additional_kernel_parameters>audit=1 no-scroll fbcon=scrollback:0</additional_kernel_parameters>
+                    <enable_autologin config:type="boolean">false</enable_autologin>
+		    <!-- we only need iptables present but no firewalld -->
+                    <enable_firewall config:type="boolean">false</enable_firewall>
+		    <enable_sshd config:type="boolean">true</enable_sshd>
+                  </globals>
+
+                  <software>
+                    <default_patterns>base common-criteria</default_patterns>
+                    <!-- FIXME: for testing -->
+                    <minimalistic_libzypp_config config:type="boolean">false</minimalistic_libzypp_config>
+                  </software>
+
+                  <!-- FIXME: this should be read from main control file during build and then copied from there
+                       see openSUSE MicroOS on how to do that.
+                       -->
+                  <partitioning>
+                     <expert_partitioner_warning config:type="boolean">false</expert_partitioner_warning>
+
+                      <proposal>
+                          <lvm config:type="boolean">false</lvm>
+                      </proposal>
+
+                      <volumes config:type="list">
+                          <!-- / volume: 3 GiB - 10 GiB, *4 if snapshots are used -->
+                          <volume>
+                              <mount_point>/</mount_point>
+                              <fs_type>btrfs</fs_type>
+
+                              <desired_size config:type="disksize">5 GiB</desired_size>
+                              <min_size config:type="disksize">3 GiB</min_size>
+                              <max_size config:type="disksize">10 GiB</max_size>
+                              <weight config:type="integer">60</weight>
+
+                              <snapshots config:type="boolean">true</snapshots>
+                              <snapshots_configurable config:type="boolean">true</snapshots_configurable>
+                              <snapshots_percentage config:type="integer">300</snapshots_percentage>
+
+                              <!-- On the initial proposal, try disabling snapshots if it was
+                                   not enough to disable /home and swap -->
+                              <disable_order config:type="integer">3</disable_order>
+
+                              <!-- the default subvolume "@" was requested by product management -->
+                              <btrfs_default_subvolume>@</btrfs_default_subvolume>
+                              <btrfs_read_only config:type="boolean">false</btrfs_read_only>
+
+                              <!-- subvolumes to be created for a Btrfs root file system -->
+                              <!-- copy_on_write is true by default -->
+                              <subvolumes config:type="list">
+                                  <subvolume>
+                                      <path>home</path>
+                                  </subvolume>
+                                  <subvolume>
+                                      <path>opt</path>
+                                  </subvolume>
+                                  <subvolume>
+                                      <path>root</path>
+                                  </subvolume>
+                                  <subvolume>
+                                      <path>srv</path>
+                                  </subvolume>
+                                  <!-- XXX: this is the only change compared to SLE. We need tmp on tmpfs
+                                  <subvolume>
+                                      <path>tmp</path>
+                                  </subvolume>
+                                  -->
+                                  <subvolume>
+                                      <path>usr/local</path>
+                                  </subvolume>
+                                  <!-- unified var subvolume - https://lists.opensuse.org/opensuse-packaging/2017-11/msg00017.html -->
+                                  <subvolume>
+                                      <path>var</path>
+                                      <copy_on_write config:type="boolean">false</copy_on_write>
+                                  </subvolume>
+
+                                  <!-- architecture specific subvolumes -->
+
+                                  <subvolume>
+                                      <path>boot/grub2/i386-pc</path>
+                                      <archs>i386,x86_64</archs>
+                                  </subvolume>
+                                  <subvolume>
+                                      <path>boot/grub2/x86_64-efi</path>
+                                      <archs>x86_64</archs>
+                                  </subvolume>
+                                  <subvolume>
+                                      <path>boot/grub2/powerpc-ieee1275</path>
+                                      <archs>ppc,!board_powernv</archs>
+                                  </subvolume>
+                                  <subvolume>
+                                      <path>boot/grub2/s390x-emu</path>
+                                      <archs>s390</archs>
+                                  </subvolume>
+                                  <subvolume>
+                                      <path>boot/grub2/arm64-efi</path>
+                                      <archs>aarch64</archs>
+                                  </subvolume>
+                              </subvolumes>
+                          </volume>
+
+                          <!-- separate /home: 5 GiB - unlimited -->
+                          <volume>
+                              <mount_point>/home</mount_point>
+                              <fs_type>xfs</fs_type>
+
+                              <proposed_configurable config:type="boolean">true</proposed_configurable>
+
+                              <desired_size config:type="disksize">10 GiB</desired_size>
+                              <min_size config:type="disksize">5 GiB</min_size>
+                              <max_size config:type="disksize">unlimited</max_size>
+                              <max_size_lvm config:type="disksize">25 GiB</max_size_lvm>
+                              <weight config:type="integer">40</weight>
+
+                              <disable_order config:type="integer">1</disable_order>
+
+                              <!-- if this volume is disabled we want "/" to increase -->
+                              <fallback_for_desired_size>/</fallback_for_desired_size>
+                              <fallback_for_max_size>/</fallback_for_max_size>
+                              <fallback_for_max_size_lvm>/</fallback_for_max_size_lvm>
+                              <fallback_for_weight>/</fallback_for_weight>
+                          </volume>
+
+                          <!-- swap: 1 GiB - 2 GiB, but at least RAM size -->
+                          <volume>
+                              <mount_point>swap</mount_point>
+                              <fs_type>swap</fs_type>
+
+                              <proposed_configurable config:type="boolean">true</proposed_configurable>
+
+                              <desired_size config:type="disksize">2 GiB</desired_size>
+                              <min_size config:type="disksize">1 GiB</min_size>
+                              <max_size config:type="disksize">2 GiB</max_size>
+                              <weight config:type="integer">10</weight>
+                              <!-- The option to resume from RAM is not available for Z Systems.
+                                   For this reason, in s390 the default value of adjust_by_ram
+                                   is forced to false for the swap volume, even when it was set
+                                   to true here. -->
+                              <adjust_by_ram config:type="boolean">true</adjust_by_ram>
+                              <adjust_by_ram_configurable config:type="boolean">true</adjust_by_ram_configurable>
+
+                              <disable_order config:type="integer">2</disable_order>
+                          </volume>
+
+                      </volumes>
+                  </partitioning>
+                </system_role>
+              </system_roles>
+            </insert_system_role>
+          </insert_system_roles>
+        </system_roles>
+    </update>
+
+    <!-- Don't forget to add the texts -->
+    <texts>
+      <cc_role>
+        <label>Common Criteria</label>
+      </cc_role>
+      <cc_role_description>
+        <label>• Special settings for the Common Criteria Evaluated Configuration
+</label>
+      </cc_role_description>
+    </texts>
 </productDefines>
