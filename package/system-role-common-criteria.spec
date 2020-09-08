@@ -71,13 +71,13 @@ install -m 644 control/installation.xml $RPM_BUILD_ROOT/%{_datadir}/system-roles
 # install LICENSE (required by build service check)
 mkdir -p $RPM_BUILD_ROOT/%{_prefix}/share/doc/packages/%{name}
 install -m 644 LICENSE $RPM_BUILD_ROOT/%{_prefix}/share/doc/packages/%{name}
-mkdir -p %{buildroot}/%{yast_libdir}/y2system_role_handlers
-install -m 644 src/lib/y2system_role_handlers/cc_role_finish.rb %{buildroot}/%{yast_libdir}/y2system_role_handlers
+mkdir -p %{buildroot}/%{_datadir}/YaST2/lib/y2system_role_handlers
+install -m 644 src/lib/y2system_role_handlers/cc_role_finish.rb %{buildroot}/%{_datadir}/YaST2/lib/y2system_role_handlers
 
 %files
 %defattr(644,root,root,755)
 %{_datadir}/system-roles
-%{yast_libdir}/y2system_role_handlers/*.rb
+%{_datadir}/YaST2
 %doc %dir %{_prefix}/share/doc/packages/%{name}
 %doc %{_prefix}/share/doc/packages/%{name}/LICENSE
 
