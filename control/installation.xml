@@ -17,9 +17,7 @@ textdomain="cc-control"
                 <system_role>
                   <id>cc_role</id>
 		  <order config:type="integer">1100</order>
-		  <!--
-		  <additional_dialogs>inst_cc_foo</additional_dialogs>
-		  -->
+                  <additional_dialogs>inst_cc_mode</additional_dialogs>
                   <globals>
                     <additional_kernel_parameters>audit=1 no-scroll fbcon=scrollback:0 fips=1</additional_kernel_parameters>
                     <enable_autologin config:type="boolean">false</enable_autologin>
@@ -176,10 +174,10 @@ textdomain="cc-control"
     <!-- Don't forget to add the texts -->
     <texts>
       <cc_role>
-        <label>Common Criteria</label>
+        <label>Common Criteria evaluated configuration</label>
       </cc_role>
       <cc_role_description>
-        <label>• Special settings for the Common Criteria Evaluated Configuration
+        <label>• Special mode for the Common Criteria evaluated configuration
 </label>
       </cc_role_description>
     </texts>
