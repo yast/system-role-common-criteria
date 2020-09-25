@@ -21,7 +21,7 @@ textdomain="cc-control"
 		  <additional_dialogs>inst_cc_foo</additional_dialogs>
 		  -->
                   <globals>
-                    <additional_kernel_parameters>audit=1 no-scroll fbcon=scrollback:0</additional_kernel_parameters>
+                    <additional_kernel_parameters>audit=1 no-scroll fbcon=scrollback:0 fips=1</additional_kernel_parameters>
                     <enable_autologin config:type="boolean">false</enable_autologin>
 		    <!-- we only need iptables present but no firewalld -->
                     <enable_firewall config:type="boolean">false</enable_firewall>
@@ -29,7 +29,7 @@ textdomain="cc-control"
                   </globals>
 
                   <software>
-                    <default_patterns>base common-criteria</default_patterns>
+                    <default_patterns>base common-criteria fips</default_patterns>
                     <!-- FIXME: for testing -->
                     <minimalistic_libzypp_config config:type="boolean">false</minimalistic_libzypp_config>
                   </software>
