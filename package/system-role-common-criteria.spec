@@ -36,7 +36,7 @@ BuildRequires:  yast2-installation-control >= 4.0.4
 
 Url:            https://github.com/yast/system-role-common-criteria
 AutoReqProv:    off
-Version:        15.2.0
+Version:        15.2.1
 Release:        0
 Summary:        System role for Common Criteria
 License:        MIT
