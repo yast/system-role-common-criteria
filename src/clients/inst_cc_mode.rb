@@ -106,6 +106,7 @@ module Yast
         WFM.Write(path(".local.string"), "/etc/gcrypt/fips_enabled", "1")
       end
 
+      Wizard.CloseDialog
       ret
     end
   end
