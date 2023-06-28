@@ -55,7 +55,7 @@ module Y2CommonCriteria
         HSquash(
           VSquash(
             VBox(
-              MinWidth(60, MinHeight(9, RichText(description_text))),
+              MinWidth(60, MinHeight(10, RichText(description_text))),
               VSpacing(2),
               passwd_widget(:passphrase, _("Encryption Passphrase")),
               passwd_widget(:repeat_passphrase, _("Verify Passphrase")),
@@ -66,7 +66,17 @@ module Y2CommonCriteria
 
       # @return [String]
       def help_text
-        _("<p>Click <b>Next</b> to continue.</p>\n")
+        _(
+          "<p>When installing SUSE Linux Enterprise in the Common Criteria evaluated " \
+          "configuration, some restrictions apply to available configuration options.</p>\n" \
+          "<p>Please refer to the deployment guide before proceeding.</p>\n" \
+          "<p>Common Criteria demands all file systems to be encrypted. The passphrase " \
+          "entered here will be used by default for encrypting devices in the partitioning " \
+          "Guided Setup. That includes the initial partitioning proposal automatically " \
+          "calculated by the installer.</p>\n" \
+          "<p>Notice that you will have to enter the correct password each time you boot " \
+          "the system. So make sure to not lose it!</p>"
+        )
       end
 
       # Handler for the 'next' event (button)
@@ -95,10 +105,11 @@ module Y2CommonCriteria
       # @return [String]
       def description_text
         _(
-          "<p>When installing SUSE Linux Enterprise in the Common Criteria evaluated " \
-          "configuration, some restrictions apply to available configuration options.</p>\n" \
-          "<p>Please refer to the deployment guide before proceeding.</p>\n" \
-          "<p>This is a paragraph about the encryption passphrase.</p>\n"
+          "<p>Please refer to the deployment guide before proceeding with the " \
+          "installation of this Common Criteria evaluated configuration.</p>\n" \
+          "<p>Enter a passphrase below to be used by default when encrypting devices " \
+          "during system installation.</p>\n" \
+          "<p>Read Help for more details.</p>\n"
         )
       end
 
