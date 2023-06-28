@@ -1,4 +1,4 @@
-# Copyright (c) [2020-2022] SUSE LLC
+# Copyright (c) [2020-2023] SUSE LLC
 #
 # All Rights Reserved.
 #
@@ -19,6 +19,7 @@
 
 require "yast"
 require "ui/installation_dialog"
+require "y2storage/encrypt_password_checker"
 
 # Namespace for code specific to the Common Criteria system role
 module Y2CommonCriteria
@@ -31,8 +32,12 @@ module Y2CommonCriteria
       def initialize
         super
         textdomain "cc"
+
         Yast.import "UI"
-        Yast.import "RichText"
+        Yast.import "ProductFeatures"
+        Yast.import "Report"
+
+        @passwd_checker = Y2Storage::EncryptPasswordChecker.new
       end
 
       # @return [String]
@@ -47,32 +52,15 @@ module Y2CommonCriteria
         ).to_s
         log.info("entropy #{entropy}")
 
-        display = Yast::UI.GetDisplayInfo
-        space = display["TextMode"] ? 1 : 3
-
-        text = _("<p><b>Common Criteria Evaluated Configuration enabled</b></p>") +
-          _(
-            "<p>When installing SUSE Linux Enterprise in the Common Criteria evaluated configation," \
-            "some restrictions apply to available configuration options.\n" \
-            "Please refer to the deployment guide before proceeding.\n" \
-            "Click <b>Next</b> to continue. </p>\n\n"
+        HSquash(
+          VSquash(
+            VBox(
+              MinWidth(60, MinHeight(9, RichText(description_text))),
+              VSpacing(2),
+              passwd_widget(:passphrase, _("Encryption Passphrase")),
+              passwd_widget(:repeat_passphrase, _("Verify Passphrase")),
+            )
           )
-        rt =
-          if Yast::Builtins.regexpmatch(text, "</.*>")
-            RichText(Id(:text), text)
-          else
-            log.debug "plain text"
-            RichText(Id(:text), Opt(:plainText), text)
-          end
-
-        VBox(
-          VSpacing(space),
-          HBox(
-            HSpacing(2 * space),
-            rt,
-            HSpacing(2 * space)
-          ),
-          VSpacing(2)
         )
       end
 
@@ -83,8 +71,7 @@ module Y2CommonCriteria
 
       # Handler for the 'next' event (button)
       def next_handler
-        # for testing to speed things up
-        #Yast::Pkg.SetSolverFlags("onlyRequires" => true)
+        return unless valid?
 
         # put libgcrypt into FIPS mode. libstorage-ng calls the cryptsetup
         # external command so this takes effect when formatting luks volumes.
@@ -92,7 +79,89 @@ module Y2CommonCriteria
         # command line so this setting is not needed.
         Yast::WFM.Execute(Yast::Path.new(".local.mkdir"), "/etc/gcrypt")
         Yast::WFM.Write(Yast::Path.new(".local.string"), "/etc/gcrypt/fips_enabled", "1")
+
+        write_passphrase
+
         super
+      end
+
+      protected
+
+      # @return [Y2Storage::EncryptPasswordChecker]
+      attr_reader :passwd_checker
+
+      # Introductory text to explain how the role works
+      #
+      # @return [String]
+      def description_text
+        _(
+          "<p>When installing SUSE Linux Enterprise in the Common Criteria evaluated " \
+          "configuration, some restrictions apply to available configuration options.</p>\n" \
+          "<p>Please refer to the deployment guide before proceeding.</p>\n" \
+          "<p>This is a paragraph about the encryption passphrase.</p>\n"
+        )
+      end
+
+      # @return [Yast::Term] ui content for dialog
+      def passwd_widget(id, label)
+        Password(Id(id), Opt(:hstretch), label, proposal_features["encryption_password"] || "")
+      end
+
+      # Whether the information entered in the form is acceptable
+      #
+      # @return [Boolean]
+      def valid?
+        valid_passphrase? && good_passphrase?
+      end
+
+      # @see #valid?
+      def valid_passphrase?
+        msg = passwd_checker.error_msg(widget_value(:passphrase), widget_value(:repeat_passphrase))
+        return true if msg.nil?
+
+        Yast::Report.Warning(msg)
+        false
+      end
+
+      # @see #valid?
+      #
+      # User has the last word to decide whether to use a weak passphrase.
+      def good_passphrase?
+        message = passwd_checker.warning_msg(widget_value(:passphrase))
+        return true if message.nil?
+
+        popup_text = message + "\n\n" + _("Really use this passphrase?")
+        Yast::Popup.AnyQuestion(
+          "",
+          popup_text,
+          Yast::Label.YesButton,
+          Yast::Label.NoButton,
+          :focus_yes
+        )
+      end
+
+      # Helper to get the value of the given widget
+      def widget_value(id)
+        Yast::UI.QueryWidget(Id(id), :Value)
+      end
+
+      # Writes the entered passphrase into the default storage proposal settings
+      def write_passphrase
+        proposal = proposal_features
+        proposal["encryption_password"] = widget_value(:passphrase)
+        log.info "Writing CC passphrase at default storage proposal settings"
+        Yast::ProductFeatures.SetFeature("partitioning", "proposal", proposal)
+      end
+
+      # Definition of the storage proposal in the product features
+      #
+      # @return [Hash]
+      def proposal_features
+        section = Yast::ProductFeatures.GetFeature("partitioning", "proposal")
+
+        # If there is no proposal section (for example, not really running the dialog during
+        # installation), proposal may be an empty string here
+        section.empty? ? {} : section
       end
     end
   end
