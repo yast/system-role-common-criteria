@@ -20,8 +20,8 @@
 require "yast"
 require "ui/installation_dialog"
 require "y2storage/encrypt_password_checker"
+require "y2common_criteria/encryption"
 
-# Namespace for code specific to the Common Criteria system role
 module Y2CommonCriteria
   # Dialogs for the Common Criteria role
   module Dialogs
@@ -115,7 +115,7 @@ module Y2CommonCriteria
 
       # @return [Yast::Term] ui content for dialog
       def passwd_widget(id, label)
-        Password(Id(id), Opt(:hstretch), label, proposal_features["encryption_password"] || "")
+        Password(Id(id), Opt(:hstretch), label, product_features_password)
       end
 
       # Whether the information entered in the form is acceptable
@@ -159,7 +159,7 @@ module Y2CommonCriteria
       # Writes the entered passphrase into the default storage proposal settings
       def write_passphrase
         proposal = proposal_features
-        proposal["encryption_password"] = widget_value(:passphrase)
+        proposal["encryption"] = Encryption.new(widget_value(:passphrase))
         log.info "Writing CC passphrase at default storage proposal settings"
         Yast::ProductFeatures.SetFeature("partitioning", "proposal", proposal)
       end
@@ -173,6 +173,16 @@ module Y2CommonCriteria
         # If there is no proposal section (for example, not really running the dialog during
         # installation), proposal may be an empty string here
         section.empty? ? {} : section
+      end
+
+      # Value of the encryption password stored at the ProductFeatures
+      #
+      # @return [String]
+      def product_features_password
+        enc = proposal_features["encryption"]
+        return "" unless enc.respond_to?(:password)
+
+        enc.password || ""
       end
     end
   end
