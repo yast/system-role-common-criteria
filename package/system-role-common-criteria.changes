@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Jun 29 11:39:21 UTC 2023 - Ancor Gonzalez Sosa <ancor@suse.com>
+
+- Set the encryption password directly from the role dialog
+  (jsc#PED-4166, jsc#PED-4474)
+- 15.4.2
+
+-------------------------------------------------------------------
 Mon May  9 08:42:36 UTC 2022 - Marcus Meissner <meissner@suse.com>
 
 - Restore UI layout after Common Criteria confirmation (bsc#1194279)
