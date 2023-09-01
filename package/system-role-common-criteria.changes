@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Sep 01 19:57:03 UTC 2023 - Josef Reidinger <jreidinger@suse.com>
+
+- Branch package for SP6 (bsc#1208913)
+
+-------------------------------------------------------------------
 Mon May  9 08:42:36 UTC 2022 - Marcus Meissner <meissner@suse.com>
 
 - Restore UI layout after Common Criteria confirmation (bsc#1194279)
