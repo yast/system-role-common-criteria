@@ -36,7 +36,7 @@ BuildRequires:  yast2-installation-control >= 4.0.4
 
 Url:            https://github.com/yast/system-role-common-criteria
 AutoReqProv:    off
-Version:        15.5.1
+Version:        15.5.2
 Release:        0
 Summary:        System role for Common Criteria Certification
 License:        MIT
@@ -73,6 +73,10 @@ mkdir -p $RPM_BUILD_ROOT/%{_prefix}/share/doc/packages/%{name}
 install -m 644 LICENSE $RPM_BUILD_ROOT/%{_prefix}/share/doc/packages/%{name}
 mkdir -p %{buildroot}/%{_datadir}/YaST2/lib/y2system_role_handlers
 install -m 644 src/lib/y2system_role_handlers/cc_role_finish.rb %{buildroot}/%{_datadir}/YaST2/lib/y2system_role_handlers
+mkdir -p %{buildroot}/%{_datadir}/YaST2/lib/y2common_criteria/dialogs
+install -m 644 src/lib/y2common_criteria.rb %{buildroot}/%{_datadir}/YaST2/lib/y2common_criteria.rb
+install -m 644 src/lib/y2common_criteria/encryption.rb %{buildroot}/%{_datadir}/YaST2/lib/y2common_criteria/encryption.rb
+install -m 644 src/lib/y2common_criteria/dialogs/installation.rb %{buildroot}/%{_datadir}/YaST2/lib/y2common_criteria/dialogs/installation.rb
 mkdir -p %{buildroot}/%{_datadir}/YaST2/clients
 install -m 644 src/clients/inst_cc_mode.rb %{buildroot}/%{_datadir}/YaST2/clients/inst_cc_mode.rb
 
