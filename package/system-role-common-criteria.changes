@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Sep 06 07:14:32 UTC 2024 - Ladislav Slezák <lslezak@suse.com>
+
+- Branch package for SP7 (bsc#1230201)
+
+-------------------------------------------------------------------
 Thu Nov 16 11:57:01 UTC 2023 - Ancor Gonzalez Sosa <ancor@suse.com>
 
 - Set the encryption password directly from the role dialog
